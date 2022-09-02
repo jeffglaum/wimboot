@@ -47,7 +47,8 @@ static __attribute__ (( noinline )) unsigned long make_cookie ( void ) {
 	 * counter, which will have at least some minimal randomness
 	 * in the low bits by the time we are invoked.
 	 */
-	__asm__ ( "rdtsc" : "=a" ( u.eax ), "=d" ( u.edx ) );
+	// TODO
+	//__asm__ ( "rdtsc" : "=a" ( u.eax ), "=d" ( u.edx ) );
 	cookie = u.tsc;
 
 	/* Ensure that the value contains a NUL byte, to act as a

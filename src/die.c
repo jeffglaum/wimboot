@@ -57,7 +57,8 @@ void die ( const char *fmt, ... ) {
 		printf ( "Failed to reboot\n" );
 
 	} else {
-
+	// TODO
+#if 0
 		/* Wait for keypress */
 		printf ( "Press a key to reboot..." );
 		getchar();
@@ -65,6 +66,7 @@ void die ( const char *fmt, ... ) {
 
 		/* Reboot system */
 		reboot();
+#endif
 	}
 
 	/* Should be impossible to reach this */

@@ -16,4 +16,8 @@
 #include <efi/X64/ProcessorBind.h>
 #endif
 
+#if __aarch64__
+#include <efi/aarch64/ProcessorBind.h>
+#endif
+
 #endif /* _WIMBOOT_EFI_PROCESSOR_BIND_H */

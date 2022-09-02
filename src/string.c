@@ -39,6 +39,7 @@
  * @ret dest		Destination address
  */
 void * memcpy ( void *dest, const void *src, size_t len ) {
+#if 0
 	void *edi = dest;
 	const void *esi = src;
 	int discard_ecx;
@@ -55,6 +56,8 @@ void * memcpy ( void *dest, const void *src, size_t len ) {
 			       : "0" ( edi ), "1" ( esi ), "2" ( len & 3 )
 			       : "memory" );
 	return dest;
+#endif
+	return NULL;
 }
 
 /**
@@ -66,6 +69,7 @@ void * memcpy ( void *dest, const void *src, size_t len ) {
  * @ret dest		Destination address
  */
 static void * memcpy_reverse ( void *dest, const void *src, size_t len ) {
+#if 0
 	void *edi = ( dest + len - 1 );
 	const void *esi = ( src + len - 1 );
 	int discard_ecx;
@@ -87,6 +91,8 @@ static void * memcpy_reverse ( void *dest, const void *src, size_t len ) {
 				 "2" ( len )
 			       : "memory" );
 	return dest;
+#endif
+	return NULL;
 }
 
 /**
@@ -98,12 +104,14 @@ static void * memcpy_reverse ( void *dest, const void *src, size_t len ) {
  * @ret dest		Destination address
  */
 void * memmove ( void *dest, const void *src, size_t len ) {
-
+#if 0
 	if ( dest <= src ) {
 		return memcpy ( dest, src, len );
 	} else {
 		return memcpy_reverse ( dest, src, len );
 	}
+#endif
+	return NULL;
 }
 
 /**
@@ -115,6 +123,7 @@ void * memmove ( void *dest, const void *src, size_t len ) {
  * @ret dest		Destination address
  */
 void * memset ( void *dest, int c, size_t len ) {
+#if 0
 	void *edi = dest;
 	int eax = c;
 	int discard_ecx;
@@ -135,6 +144,9 @@ void * memset ( void *dest, int c, size_t len ) {
 			       : "0" ( edi ), "1" ( eax ), "2" ( len & 3 )
 			       : "memory" );
 	return dest;
+#endif
+
+	return NULL;
 }
 
 /**

@@ -45,8 +45,9 @@ int putchar ( int character ) {
 		putchar ( '\r' );
 
 	/* Print character to bochs debug port */
-	__asm__ __volatile__ ( "outb %b0, $0xe9"
-			       : : "a" ( character ) );
+	// TODO
+	//__asm__ __volatile__ ( "outb %b0, $0xe9"
+	//		       : : "a" ( character ) );
 
 	/* Print character to EFI/BIOS console as applicable */
 	if ( efi_systab ) {
@@ -55,11 +56,14 @@ int putchar ( int character ) {
 		wbuf[1] = 0;
 		conout->OutputString ( conout, wbuf );
 	} else {
+		// TODO
+#if 0
 		memset ( &params, 0, sizeof ( params ) );
 		params.vector.interrupt = 0x10;
 		params.eax = ( 0x0e00 | character );
 		params.ebx = 0x0007;
 		call_interrupt ( &params );
+#endif
 	}
 
 	return 0;
@@ -86,10 +90,13 @@ int getchar ( void ) {
 		conin->ReadKeyStroke ( conin, &key );
 		character = key.UnicodeChar;
 	} else {
+	// TODO
+#if 0
 		memset ( &params, 0, sizeof ( params ) );
 		params.vector.interrupt = 0x16;
 		call_interrupt ( &params );
 		character = params.al;
+#endif
 	}
 
 	return character;

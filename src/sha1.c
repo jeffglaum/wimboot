@@ -31,7 +31,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include <byteswap.h>
+// TOOD
+//#include <byteswap.h>
+#include <byteswap-aarch64.h>
 #include <assert.h>
 #include "rotate.h"
 #include "sha1.h"
