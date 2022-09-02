@@ -58,7 +58,12 @@
 #define PREFIX_FLAT_DS 0x18
 
 /* PE header architecture-dependent values */
-#if __x86_64__
+#if __aarch64__
+	/* TODO */
+	.equ	coff_machine, 0x8664
+	.equ	coff_characteristics, 0x2022
+	.equ	opt_magic, 0x20b
+#elif __x86_64__
 	.equ	coff_machine, 0x8664
 	.equ	coff_characteristics, 0x2022
 	.equ	opt_magic, 0x20b
@@ -69,8 +74,9 @@
 #endif
 
 	.text
-	.code16
-	.arch	i386
+	//.code16
+	//.arch	i386
+	.arch armv8-a
 	.org	0
 	.section ".prefix", "ax", @progbits
 
@@ -219,6 +225,8 @@ setup_sects:
 boot_flag:
 	.word	0xaa55
 
+// TODO
+#if 0
 	.org	0x200
 jump:
 	.byte	0xeb, setup - 1f
@@ -235,6 +243,7 @@ version:
 	.org	0x20e
 kernel_version:
 	.word	( version_string - _prefix - 0x200 )
+#endif 
 
 	.org	0x211
 loadflags:
@@ -259,6 +268,8 @@ ramdisk_max:
 version_string:
 	.asciz	VERSION
 
+// TODO
+#if 0
 	/* Setup code */
 setup:
 	/* Reset %cs so that labels work */
@@ -336,6 +347,7 @@ gdt:
 	.byte	0, 0x93, 0xcf, 0	
 	.size	gdt, . - gdt
 	.equ	gdt_limit, . - gdt - 1
+#endif
 
 debug:
 	.long	0			/* Characteristics */
