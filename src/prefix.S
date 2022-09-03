@@ -60,8 +60,8 @@
 /* PE header architecture-dependent values */
 #if __aarch64__
 	/* TODO */
-	.equ	coff_machine, 0x8664
-	.equ	coff_characteristics, 0x2022
+	.equ	coff_machine, 0xaa64
+	.equ	coff_characteristics, 0x2e
 	.equ	opt_magic, 0x20b
 #elif __x86_64__
 	.equ	coff_machine, 0x8664
@@ -86,7 +86,7 @@ mz_header:
 	.ascii	"MZ"
 	.org	mz_header + 0x3c
 mz_lfanew:
-	.word	( pe_header - _prefix )
+	.hword	( pe_header - _prefix )
 	.equ	mz_header_len, . - mz_header
 	.size	mz_header,     . - mz_header
 
@@ -94,17 +94,17 @@ mz_lfanew:
 pe_header:
 	.ascii	"PE"			/* Signature */
 	.byte	0, 0
-	.word	coff_machine		/* Machine */
-	.word	5			/* NumberOfSections */
+	.hword	coff_machine		/* Machine */
+	.hword	5			/* NumberOfSections */
 	.long	0x10d1a884		/* TimeDateStamp */
 	.long	0			/* PointerToSymbolTable */
 	.long	0			/* NumberOfSymbols */
-	.word	( opt_header_len + data_directory_len ) /*SizeOfOptionalHeader*/
-	.word	coff_characteristics	/* Characteristics */
+	.hword	( opt_header_len + data_directory_len ) /*SizeOfOptionalHeader*/
+	.hword	coff_characteristics	/* Characteristics */
 	.equ	pe_header_len, . - pe_header
 	.size	pe_header,     . - pe_header
 opt_header:
-	.word	opt_magic		/* Magic */
+	.hword	opt_magic		/* Magic */
 	.byte	42			/* MajorLinkerVersion */
 	.byte	42			/* MinorLinkerVersion */
 	.long	_text_total_len		/* SizeOfCode */
@@ -112,7 +112,9 @@ opt_header:
 	.long	_bss_total_len		/* SizeOfUninitializedData */
 	.long	( efi_main - BASE_ADDRESS ) /* AddressOfEntryPoint */
 	.long	( _text - BASE_ADDRESS ) /* BaseOfCode */
-#if __x86_64__
+#if __aarch64__
+	.quad	BASE_ADDRESS		/* ImageBase */
+#elif __x86_64__
 	.quad	BASE_ADDRESS		/* ImageBase */
 #else
 	.long	( _data - BASE_ADDRESS ) /* BaseOfData */
@@ -120,19 +122,24 @@ opt_header:
 #endif
 	.long	0x200			/* SectionAlignment */
 	.long	0x200			/* FileAlignment */
-	.word	0			/* MajorOperatingSystemVersion */
-	.word	0			/* MinorOperatingSystemVersion */
-	.word	0			/* MajorImageVersion */
-	.word	0			/* MinorImageVersion */
-	.word	0			/* MajorSubsystemVersion */
-	.word	0			/* MinorSubsystemVersion */
+	.hword	0			/* MajorOperatingSystemVersion */
+	.hword	0			/* MinorOperatingSystemVersion */
+	.hword	0			/* MajorImageVersion */
+	.hword	0			/* MinorImageVersion */
+	.hword	0			/* MajorSubsystemVersion */
+	.hword	0			/* MinorSubsystemVersion */
 	.long	0			/* Win32VersionValue */
 	.long	( _end - BASE_ADDRESS )	/* SizeOfImage */
 	.long	_prefix_len		/* SizeOfHeaders */
 	.long	0			/* Checksum */
-	.word	0x0a			/* Subsystem */
-	.word	0			/* DllCharacteristics */
-#if __x86_64__
+	.hword	0x0a			/* Subsystem */
+	.hword	0			/* DllCharacteristics */
+#if __aarch64__
+	.quad	0			/* SizeOfStackReserve */
+	.quad	0			/* SizeOfStackCommit */
+	.quad	0			/* SizeOfHeapReserve */
+	.quad	0			/* SizeOfHeapCommit */
+#eif __x86_64__
 	.quad	0			/* SizeOfStackReserve */
 	.quad	0			/* SizeOfStackCommit */
 	.quad	0			/* SizeOfHeapReserve */
@@ -168,8 +175,8 @@ coff_sections:
 	.long	0			/* PointerToRawData */
 	.long	0			/* PointerToRelocations */
 	.long	0			/* PointerToLinenumbers */
-	.word	0			/* NumberOfRelocations */
-	.word	0			/* NumberOfLinenumbers */
+	.hword	0			/* NumberOfRelocations */
+	.hword	0			/* NumberOfLinenumbers */
 	.long	0xc8000080		/* Characteristics */
 	.ascii	".payload"		/* Name */
 	.long	_payload_len		/* Misc.VirtualSize */
@@ -178,8 +185,8 @@ coff_sections:
 	.long	_payload_pos		/* PointerToRawData */
 	.long	0			/* PointerToRelocations */
 	.long	0			/* PointerToLinenumbers */
-	.word	0			/* NumberOfRelocations */
-	.word	0			/* NumberOfLinenumbers */
+	.hword	0			/* NumberOfRelocations */
+	.hword	0			/* NumberOfLinenumbers */
 	.long	0xe80000e0		/* Characteristics */
 	.ascii	".bss"			/* Name */
 	.byte	0, 0, 0, 0
@@ -189,8 +196,8 @@ coff_sections:
 	.long	0			/* PointerToRawData */
 	.long	0			/* PointerToRelocations */
 	.long	0			/* PointerToLinenumbers */
-	.word	0			/* NumberOfRelocations */
-	.word	0			/* NumberOfLinenumbers */
+	.hword	0			/* NumberOfRelocations */
+	.hword	0			/* NumberOfLinenumbers */
 	.long	0xc8000080		/* Characteristics */
 	.ascii	".sbat"			/* Name */
 	.byte	0, 0, 0
@@ -200,8 +207,8 @@ coff_sections:
 	.long	_sbat_pos		/* PointerToRawData */
 	.long	0			/* PointerToRelocations */
 	.long	0			/* PointerToLinenumbers */
-	.word	0			/* NumberOfRelocations */
-	.word	0			/* NumberOfLinenumbers */
+	.hword	0			/* NumberOfRelocations */
+	.hword	0			/* NumberOfLinenumbers */
 	.long	0x48000040		/* Characteristics */
 	.ascii	".reloc"		/* Name */
 	.byte	0, 0
@@ -211,8 +218,8 @@ coff_sections:
 	.long	_reloc_pos		/* PointerToRawData */
 	.long	0			/* PointerToRelocations */
 	.long	0			/* PointerToLinenumbers */
-	.word	0			/* NumberOfRelocations */
-	.word	0			/* NumberOfLinenumbers */
+	.hword	0			/* NumberOfRelocations */
+	.hword	0			/* NumberOfLinenumbers */
 	.long	0x48000040		/* Characteristics */
 	.equ	coff_sections_len, . - coff_sections
 	.size	coff_sections,	   . - coff_sections
@@ -223,7 +230,7 @@ setup_sects:
 
 	.org	0x1fe
 boot_flag:
-	.word	0xaa55
+	.hword	0xaa55
 
 // TODO
 #if 0
@@ -231,6 +238,7 @@ boot_flag:
 jump:
 	.byte	0xeb, setup - 1f
 1:
+#endif 
 
 	.org	0x202
 header:
@@ -238,12 +246,11 @@ header:
 
 	.org	0x206
 version:
-	.word	0x203	/* Version 2.03 */
+	.hword	0x203	/* Version 2.03 */
 
 	.org	0x20e
 kernel_version:
-	.word	( version_string - _prefix - 0x200 )
-#endif 
+	.hword	( version_string - _prefix - 0x200 )
 
 	.org	0x211
 loadflags:
@@ -255,7 +262,7 @@ ramdisk_image:
 
 	.org	0x21c
 ramdisk_size:
-	.long	0	/* Filled in by boot loader */
+	.long	0	/* Filled in by boot loader */ 
 
 	.org	0x228
 cmd_line_ptr:
@@ -331,19 +338,19 @@ setup:
 
 	/* Global descriptor table */
 gdt:
-	.word	gdt_limit
+	.hword	gdt_limit
 	.long	( gdt - _prefix )
 	/* 32-bit protected mode code segment based at real-mode %cs:0000 */
 	.org	( gdt + PREFIX_CS )
-	.word	0xffff, 0
+	.hword	0xffff, 0
 	.byte	0, 0x9f, 0xcf, 0
 	/* 32 bit protected mode flat code segment */
 	.org	( gdt + PREFIX_FLAT_CS )
-	.word	0xffff, 0
+	.hword	0xffff, 0
 	.byte	0, 0x9f, 0xcf, 0
 	/* 32 bit protected mode flat data segment */
 	.org	( gdt + PREFIX_FLAT_DS )
-	.word	0xffff, 0
+	.hword	0xffff, 0
 	.byte	0, 0x93, 0xcf, 0	
 	.size	gdt, . - gdt
 	.equ	gdt_limit, . - gdt - 1
@@ -352,8 +359,8 @@ gdt:
 debug:
 	.long	0			/* Characteristics */
 	.long	0x10d1a884		/* TimeDateStamp */
-	.word	0			/* MajorVersion */
-	.word	0			/* MinorVersion */
+	.hword	0			/* MajorVersion */
+	.hword	0			/* MinorVersion */
 	.long	2			/* Type */
 	.long	debug_rsds_len		/* SizeOfData */
 	.long	( debug_rsds - _prefix ) /* RVA */
