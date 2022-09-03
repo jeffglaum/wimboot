@@ -120,8 +120,8 @@ wimboot : wimboot.aarch64 Makefile
 	$(CP) $< $@
 	$(CP) $@ ..\$@
 
-wimboot.%.elf : prefix.%.o lib.%.a script.lds Makefile
-	$(LD) -m aarch64elf -T script.lds -o $@ -q -Map wimboot.$*.map \
+wimboot.%.elf : prefix.%.o lib.%.a script-aarch64.lds Makefile
+	$(LD) -m aarch64elf -T script-aarch64.lds -o $@ -q -Map wimboot.$*.map \
 		prefix.$*.o lib.$*.a
 
 #wimboot.%.unsigned : wimboot.%.elf efireloc Makefile

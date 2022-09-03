@@ -95,7 +95,7 @@ pe_header:
 	.ascii	"PE"			/* Signature */
 	.byte	0, 0
 	.hword	coff_machine		/* Machine */
-	.hword	5			/* NumberOfSections */
+	.hword	4			/* NumberOfSections */
 	.long	0x10d1a884		/* TimeDateStamp */
 	.long	0			/* PointerToSymbolTable */
 	.long	0			/* NumberOfSymbols */
@@ -167,22 +167,12 @@ directory_entry_debug:
 	.equ	data_directory_len, . - data_directory
 	.size	data_directory,	    . - data_directory
 coff_sections:
-	.ascii	".bss16"		/* Name */
-	.byte	0, 0
-	.long	_bss16_len		/* Misc.VirtualSize */
-	.long	( _bss16 - BASE_ADDRESS ) /* VirtualAddress */
-	.long	0			/* SizeOfRawData */
-	.long	0			/* PointerToRawData */
-	.long	0			/* PointerToRelocations */
-	.long	0			/* PointerToLinenumbers */
-	.hword	0			/* NumberOfRelocations */
-	.hword	0			/* NumberOfLinenumbers */
-	.long	0xc8000080		/* Characteristics */
-	.ascii	".payload"		/* Name */
-	.long	_payload_len		/* Misc.VirtualSize */
-	.long	( _payload - BASE_ADDRESS ) /* VirtualAddress */
-	.long	_payload_len		/* SizeOfRawData */
-	.long	_payload_pos		/* PointerToRawData */
+	.ascii	".text"		/* Name */
+	.byte	0, 0, 0
+	.long	_text_len		/* Misc.VirtualSize */
+	.long	( _text - BASE_ADDRESS ) /* VirtualAddress */
+	.long	_text_len		/* SizeOfRawData */
+	.long	_text_pos		/* PointerToRawData */
 	.long	0			/* PointerToRelocations */
 	.long	0			/* PointerToLinenumbers */
 	.hword	0			/* NumberOfRelocations */
@@ -310,17 +300,14 @@ setup:
 
 	/* Zero real-mode and protected-mode .bss sections */
 	xorl	%eax, %eax
-	movl	$_bss16, %edi
-	movl	$_bss16_len, %ecx
-	rep stosb
 	movl	$_bss, %edi
 	movl	$_bss_len, %ecx
 	rep stosb
 
-	/* Copy payload to runtime address */
+	/* Copy text to runtime address */
 	movl	$LOADED_HIGH_ADDRESS, %esi
-	movl	$_payload, %edi
-	movl	$_payload_len, %ecx
+	movl	$_text, %edi
+	movl	$_text_len, %ecx
 	cld
 	rep movsb
 
@@ -332,7 +319,7 @@ setup:
 	movl	%cs:( ramdisk_size - _prefix ), %eax
 	movl	%eax, i386(initrd_len)
 
-	/* Jump to payload */
+	/* Jump to text */
 	ljmp	$PREFIX_FLAT_CS, $i386(startup)
 	.size	setup, . - setup
 
