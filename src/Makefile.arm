@@ -9,7 +9,7 @@ SBAT_GENERATION := 1
 #OBJECTS += wimpatch.o huffman.o lzx.o wim.o wimfile.o pause.o sha1.o cookie.o
 #OBJECTS += paging.o memmap.o
 
-OBJECTS := prefix.o vsprintf.o string.o peloader.o
+OBJECTS := vsprintf.o string.o peloader.o
 OBJECTS += vdisk.o cpio.o stdio.o lznt1.o xca.o die.o efi.o efimain.o
 OBJECTS += efiguid.o efifile.o efipath.o efiboot.o efiblock.o cmdline.o
 OBJECTS += wimpatch.o huffman.o lzx.o wim.o wimfile.o pause.o sha1.o cookie.o
@@ -21,14 +21,13 @@ OBJECTS_aarch64 := $(patsubst %.o,%.aarch64.o,$(OBJECTS))
 
 HEADERS := $(wildcard *.h)
 
+# TODO - this is only needed for Windows builds, to be removed.
 CC := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe
 AS := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\aarch64-none-elf\bin\as.exe
 AR := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\aarch64-none-elf\bin\ar.exe
 OBJCOPY := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\aarch64-none-elf\bin\objcopy.exe
-
 RANLIB := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\aarch64-none-elf\bin\ranlib.exe
 LD := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\aarch64-none-elf\bin\ld.exe
-
 CP := copy
 RM := del /f
 #CP		:= cp
@@ -51,7 +50,7 @@ ZLIB_DIR	:= /usr
 
 HOST_CFLAGS += -Wall -W -Werror
 
-# TODO - turn on warning as error.
+# TODO - turn on warning as error and update sources to build with newer GCC compiler (stricter warnings).
 #CFLAGS += -Os -ffreestanding -Wall -W -Werror -nostdinc -I. -fshort-wchar
 CFLAGS += -Os -ffreestanding -Wall -W -nostdinc -I. -fshort-wchar
 CFLAGS += -DVERSION="\"$(VERSION)\""
@@ -120,16 +119,14 @@ wimboot : wimboot.aarch64 Makefile
 	$(CP) $< $@
 	$(CP) $@ ..\$@
 
-wimboot.%.elf : prefix.%.o lib.%.a script-aarch64.lds Makefile
+wimboot.%.elf : lib.%.a script-aarch64.lds Makefile
 	$(LD) -m aarch64elf -T script-aarch64.lds -o $@ -q -Map wimboot.$*.map \
-		prefix.$*.o lib.$*.a
-
-#wimboot.%.unsigned : wimboot.%.elf efireloc Makefile
-#	$(OBJCOPY) -Obinary $< $@
-#	./efireloc $< $@
+		lib.$*.a
+	$(CP) wimboot.aarch64.elf wimboot.elf
 
 wimboot.%.unsigned : wimboot.%.elf  Makefile
 	$(OBJCOPY) -Obinary $< $@
+	./util/elf2efi64 --subsystem=10 wimboot.elf wimboot.efi
 
 wimboot.%.unsigned.hash : wimboot.%.unsigned Makefile
 #	$(PESIGN) -h -i $< | $(CUT) -d" " -f2- > $@

@@ -1,101 +1,126 @@
+/* -*- sh -*- */
+
+/*
+ * Linker script for EFI images
+ *
+ */
+
+ENTRY(efi_main)
+
 SECTIONS {
 
-	/* Align sections to keep PE tools happy */
-	alignment = 512;
+    /* The file starts at a virtual address of zero, and sections are
+     * contiguous.  Each section is aligned to at least _page_align,
+     * which defaults to 4096.  Load addresses are equal to virtual
+     * addresses.
+     */
 
-	/* Virtual addresses start at 0x20000 */
-	. = 0x20000;
-	_start = .;
+    _page_align = 4096;
 
-	/* bzImage prefix */
-	_prefix_pos = 0;
-	.prefix : AT ( _prefix_pos ) {
-		_prefix = .;
-		*(.prefix)
-		*(.prefix.*)
-		. = ALIGN ( alignment );
-		_eprefix = .;
-	}
-	_prefix_len = ABSOLUTE ( _eprefix ) - ABSOLUTE ( _prefix );
+    /* Allow one page of space for file headers, common PE/COFF layout */
+    . = _page_align;
 
-	/* text section */
-	_text_pos = ( _prefix_pos + _prefix_len );
-	.text : AT ( _text_pos ) {
-		_text = .;
-		*(.text)
-		*(.text.*)
-		_etext = .;
-		_data = .;
-		*(.rodata)
-		*(.rodata.*)
-		*(.data)
-		*(.data.*)
-		. = ALIGN ( alignment );
-		_edata = .;
-		_etext = .;
-	}
-	_text_len = ABSOLUTE ( _etext ) - ABSOLUTE ( _text );
-	_data_len = ABSOLUTE ( _edata ) - ABSOLUTE ( _data );
+    /*
+     * The text section
+     *
+     */
 
-	/* bootmgr.exe hardcodes the address 0x30000 for use as a
-	 * buffer accessible by real-mode code.  We can't fit our
-	 * .text, .data, and .bss below this region, so explicitly
-	 * place the .bss higher in memory.
-	 */
-	_forbidden_start = 0x30000;
-	_forbidden_end = 0x40000;
+    . = ALIGN ( _page_align );
+    .text : {
+	_text = .;
+	*(.text)
+	*(.text.*)
+	_etext = .;
+    }
 
-	/* Uninitialised data section */
-	.bss ( NOLOAD ) : {
-		_bss = .;
-		ASSERT ( ABSOLUTE ( . ) <= ABSOLUTE ( _forbidden_start ),
-			 "Binary is too large" );
-		. = ABSOLUTE ( _forbidden_end );
-		*(.bss)
-		*(.bss.*)
-		*(COMMON)
-		*(.stack)
-		*(.stack.*)
-		. = ALIGN ( alignment );
-		_ebss = .;
-	}
-	_bss_len = ABSOLUTE ( _ebss ) - ABSOLUTE ( _bss );
+    /*
+     * The rodata section
+     *
+     */
 
-	/* Secure Boot Advanced Targeting (SBAT) section */
-	_sbat_pos = ( _text_pos + _text_len );
-	.sbat : AT ( _sbat_pos ) {
-		_sbat = .;
-		*(.sbat)
-		*(.sbat.*)
-		_msbat = .;
-		. = ALIGN ( alignment );
-		_esbat = .;
-	}
-	_sbat_used = ABSOLUTE ( _msbat ) - ABSOLUTE ( _sbat );
-	_sbat_len = ABSOLUTE ( _esbat ) - ABSOLUTE ( _sbat );
+    . = ALIGN ( _page_align );
+    .rodata : {
+	_rodata = .;
+	*(.rodata)
+	*(.rodata.*)
+	_erodata = .;
+    }
 
-	/* Relocations section */
-	_reloc_pos = ( _sbat_pos + _sbat_len );
-	_reloc = .;
+    /*
+     * The data section
+     *
+     */
 
-	_end = .;
+    . = ALIGN ( _page_align );
+    .data : {
+	_data = .;
+	*(.data)
+	*(.data.*)
+	KEEP(*(SORT(.tbl.*)))	/* Various tables.  See include/tables.h */
+	KEEP(*(.provided))
+	KEEP(*(.provided.*))
+	_edata = .;
+    }
 
-	_text_total_len = ( _text_len );
-	_data_total_len = ( _data_len );
-	_bss_total_len = ( _bss_len );
+    /*
+     * The bss section
+     *
+     */
 
-	/* Symbols required by i386.x86_64 objects */
-	__i386__start = _start;
-	__i386__end = _end;
+    . = ALIGN ( _page_align );
+    .bss : {
+	_bss = .;
+	*(.bss)
+	*(.bss.*)
+	*(COMMON)
+	_ebss = .;
+    }
 
-	/DISCARD/ : {
-		*(.comment)
-		*(.comment.*)
-		*(.note)
-		*(.note.*)
-		*(.eh_frame)
-		*(.eh_frame.*)
-		*(.rel)
-		*(.rel.*)
-	}
+    /*
+     * The SBAT section
+     *
+     */
+
+    . = ALIGN ( _page_align );
+    .sbat : {
+	_sbat = .;
+	KEEP(*(.sbat))
+	KEEP(*(.sbat.*))
+	_esbat = .;
+    }
+
+    /*
+     * Weak symbols that need zero values if not otherwise defined
+     *
+     */
+
+    .weak 0x0 : {
+	_weak = .;
+	*(.weak)
+	*(.weak.*)
+	_eweak = .;
+    }
+    _assert = ASSERT ( ( _weak == _eweak ), ".weak is non-zero length" );
+
+    /*
+     * Dispose of the comment and note sections to make the link map
+     * easier to read
+     *
+     */
+
+    /DISCARD/ : {
+	*(.comment)
+	*(.comment.*)
+	*(.note)
+	*(.note.*)
+	*(.eh_frame)
+	*(.eh_frame.*)
+	*(.rel)
+	*(.rel.*)
+	*(.einfo)
+	*(.einfo.*)
+	*(.discard)
+	*(.discard.*)
+	*(.pci_devlist.*)
+    }
 }
