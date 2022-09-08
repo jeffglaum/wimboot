@@ -30,6 +30,11 @@
 #include "ctype.h"
 #include "wctype.h"
 
+// TODO - move to header file.
+void arm64_memcpy ( void *dest, const void *src, size_t len );
+void arm64_memmove ( void *dest, const void *src, size_t len );
+void arm64_memset ( void *dest, size_t len, int character );
+
 /**
  * Copy memory area
  *
@@ -58,7 +63,8 @@ void * memcpy ( void *dest, const void *src, size_t len ) {
 			       : "memory" );
 	return dest;
 #endif
-	return NULL;
+	arm64_memcpy(dest, src, len);
+	return dest;
 }
 
 /**
@@ -94,6 +100,7 @@ static void * memcpy_reverse ( void *dest, const void *src, size_t len ) {
 			       : "memory" );
 	return dest;
 #endif
+	DBG ( "JDG: memcpy_reverse called.\r\n");
 	return NULL;
 }
 
@@ -114,7 +121,8 @@ void * memmove ( void *dest, const void *src, size_t len ) {
 		return memcpy_reverse ( dest, src, len );
 	}
 #endif
-	return NULL;
+	arm64_memmove(dest, src, len);
+	return dest;
 }
 
 /**
@@ -150,7 +158,8 @@ void * memset ( void *dest, int c, size_t len ) {
 	return dest;
 #endif
 
-	return NULL;
+	arm64_memset(dest, c, len);
+	return dest;
 }
 
 /**
