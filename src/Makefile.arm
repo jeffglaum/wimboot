@@ -22,17 +22,26 @@ OBJECTS_aarch64 := $(patsubst %.o,%.aarch64.o,$(OBJECTS))
 HEADERS := $(wildcard *.h)
 
 # TODO - this is only needed for Windows builds, to be removed.
-CC := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe
-AS := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\aarch64-none-elf\bin\as.exe
-AR := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\aarch64-none-elf\bin\ar.exe
-OBJCOPY := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\aarch64-none-elf\bin\objcopy.exe
-RANLIB := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\aarch64-none-elf\bin\ranlib.exe
-LD := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\aarch64-none-elf\bin\ld.exe
-CP := copy
-RM := del /f
-#CP		:= cp
-#RM		:= rm -f
-#OBJCOPY 	:= objcopy
+#CC := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe
+#AS := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\aarch64-none-elf\bin\as.exe
+#AR := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\aarch64-none-elf\bin\ar.exe
+#OBJCOPY := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\aarch64-none-elf\bin\objcopy.exe
+#RANLIB := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\aarch64-none-elf\bin\ranlib.exe
+#LD := C:\gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-elf\aarch64-none-elf\bin\ld.exe
+#CP := copy
+#RM := del /f
+
+# TODO - this is only needed for Ubuntu builds, to be merged/cleaned-up.
+GCC_CC_TOOLPATH := /home/jeffglaum/tools/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/bin
+GCC_UTIL_TOOLPATH := /home/jeffglaum/tools/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/aarch64-none-elf/bin
+CC := $(GCC_CC_TOOLPATH)/aarch64-none-elf-gcc
+AS := $(GCC_UTIL_TOOLPATH)/as
+AR := $(GCC_UTIL_TOOLPATH)/ar
+OBJCOPY := $(GCC_UTIL_TOOLPATH)/objcopy
+RANLIB := $(GCC_UTIL_TOOLPATH)/ranlib
+LD := $(GCC_UTIL_TOOLPATH)/ld
+CP		:= cp
+RM		:= rm -f
 
 HOST_CC		:= $(CC)
 AS		:= $(AS)
@@ -83,7 +92,9 @@ MS_ABI_TEST_CODE := extern void __attribute__ (( ms_abi )) ms_abi(); \
 MS_ABI_TEST = $(ECHO) '$(MS_ABI_TEST_CODE)' | \
 	      $(CC) -m64 -mno-accumulate-outgoing-args -x c -c - -o /dev/null \
 		    >/dev/null 2>&1
-MS_ABI_FLAGS := $(shell $(MS_ABI_TEST) || $(ECHO) '-maccumulate-outgoing-args')
+# TODO - causes compile error on aach64 cross-compile under Ubuntu.
+# MS_ABI_FLAGS := $(shell $(MS_ABI_TEST) || $(ECHO) '-maccumulate-outgoing-args')
+MS_ABI_FLAGS := $(shell $(MS_ABI_TEST) || $(ECHO) '')
 WORKAROUND_CFLAGS += $(MS_ABI_FLAGS)
 
 # Inhibit warnings from taking address of packed struct members
@@ -142,6 +153,7 @@ wimboot.%.efi.hash : wimboot.%.efi Makefile
 wimboot.% : wimboot.%.efi wimboot.%.efi.hash wimboot.%.unsigned.hash Makefile
 	$(DIFF) wimboot.$*.efi.hash wimboot.$*.unsigned.hash
 	$(CP) $< $@
+	$(RM) wimboot.aarch64.efi
 
 wimboot.cab : wimboot.i386.efi wimboot.x86_64.efi Makefile
 	$(GCAB) -n -c $@ wimboot.i386.efi wimboot.x86_64.efi
@@ -232,3 +244,4 @@ clean :
 	$(RM) wimboot wimboot.i386 wimboot.x86_64 wimboot.aarch64 ..\wimboot
 	$(RM) wimboot.i386.unsigned wimboot.x86_64.unsigned wimboot.aarch64.unsigned
 	$(RM) wimboot.i386.efi wimboot.x86_64.efi wimboot.aarch64 wimboot.cab
+	$(RM) wimboot.aarch64.efi wimboot.efi
