@@ -31,7 +31,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-// TOOD
+// TODO
 //#include <byteswap.h>
 #include <byteswap-aarch64.h>
 #include <assert.h>
