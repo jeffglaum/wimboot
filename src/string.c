@@ -100,7 +100,6 @@ static void * memcpy_reverse ( void *dest, const void *src, size_t len ) {
 			       : "memory" );
 	return dest;
 #endif
-	DBG ( "JDG: memcpy_reverse called.\r\n");
 	return NULL;
 }
 
