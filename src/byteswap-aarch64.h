@@ -35,8 +35,8 @@ __bswap_32s ( uint32_t *x ) {
 
 // TODO
 static inline __attribute__ (( always_inline )) uint32_t
-__bswap_32 ( uint32_t *x ) {
-	*x = __bswap_variable_32 ( *x );
+__bswap_32 ( uint32_t x ) {
+	return __bswap_variable_32(x);
 }
 
 static inline __attribute__ (( always_inline, const )) uint64_t
@@ -52,8 +52,8 @@ __bswap_64s ( uint64_t *x ) {
 
 // TODO
 static inline __attribute__ (( always_inline )) uint64_t
-__bswap_64 ( uint64_t *x ) {
-	*x = __bswap_variable_64 ( *x );
+__bswap_64 ( uint64_t x ) {
+	return __bswap_variable_64(x);
 }
 
 #define __cpu_to_leNN( bits, value ) (value)

@@ -55,16 +55,17 @@ int putchar ( int character ) {
 		wbuf[0] = character;
 		wbuf[1] = 0;
 		conout->OutputString ( conout, wbuf );
-	} else {
-		// TODO
-#if 0
+	}
+	// TODO
+#if 0 
+	else {
 		memset ( &params, 0, sizeof ( params ) );
 		params.vector.interrupt = 0x10;
 		params.eax = ( 0x0e00 | character );
 		params.ebx = 0x0007;
 		call_interrupt ( &params );
-#endif
 	}
+#endif
 
 	return 0;
 }
