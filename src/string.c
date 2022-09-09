@@ -157,7 +157,7 @@ void * memset ( void *dest, int c, size_t len ) {
 	return dest;
 #endif
 
-	arm64_memset(dest, c, len);
+	arm64_memset(dest, len, c);
 	return dest;
 }
 
