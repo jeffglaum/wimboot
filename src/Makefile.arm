@@ -68,7 +68,7 @@ CFLAGS += -DSBAT_GENERATION="\"$(SBAT_GENERATION)\""
 
 CFLAGS_i386 += -m32 -march=i386 -malign-double -fno-pic
 CFLAGS_x86_64 += -m64 -mno-red-zone -fpie
-CFLAGS_aarch64 += -march=armv8-a -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -mlittle-endian -mcmodel=small -fomit-frame-pointer
+CFLAGS_aarch64 += -march=armv8-a -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function
 
 # Enable stack protection if available
 #
@@ -213,7 +213,7 @@ lib.x86_64.a : $(OBJECTS_x86_64) $(OBJECTS_i386_x86_64) Makefile
 	$(CC) $(CFLAGS) $(CFLAGS_aarch64) -S $< -o $@
 
 %.aarch64.o : %.aarch64.s Makefile
-	$(AS) -mabi=lp64 -EL $< -o $@
+	$(AS) $< -o $@
 
 lib.aarch64.a : $(OBJECTS_aarch64) Makefile
 	$(RM) $@
